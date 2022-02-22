@@ -104,10 +104,17 @@ void HcServer<S>::start_server() {
   }
 
   // Forcefully attaching socket to the port 8080
+#if defined(SO_REUSEPORT)
   if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
     perror("setsockopt");
     exit(EXIT_FAILURE);
   }
+#else
+  if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+    perror("setsockopt");
+    exit(EXIT_FAILURE);
+  }
+#endif
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = htons(PORT);
